@@ -1,6 +1,4 @@
-console.log("TOKEN TESTE:", process.env.TOKEN);
-
-require("dotenv").config();
+require("dotenv").config(); // 🔥 SEMPRE no topo
 
 const fs = require("fs");
 const express = require("express");
@@ -8,6 +6,7 @@ const app = express();
 
 const { Client, GatewayIntentBits } = require("discord.js");
 
+// 🤖 Cliente Discord
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -26,7 +25,7 @@ if (!fs.existsSync("dados.json")) {
 
 const prefix = "!";
 
-// 🌐 Render
+// 🌐 Render (mantém online)
 const PORT = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
@@ -43,26 +42,22 @@ app.listen(PORT, () => {
 
 // 🤖 Bot pronto
 client.once("ready", () => {
-  console.log(`Bot logado como ${client.user.tag}`);
+  console.log(`✅ Bot logado como ${client.user.tag}`);
 });
 
 // 📩 Comandos
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!message.content.startsWith(prefix)) return;
-
-  // 🔒 garante que tem servidor (evita erro em DM)
   if (!message.guild) return;
 
-  // 📂 lê dados
   const dados = JSON.parse(fs.readFileSync("dados.json"));
 
-  // 🏦 canal permitido por servidor
+  // 🏦 canal permitido
   const canalPermitido = dados.canaisBanco?.[message.guild.id];
 
-  // 🚫 bloqueia se não estiver no canal certo
   if (canalPermitido && message.channel.id !== canalPermitido) {
-    return; // ou use reply se quiser avisar
+    return;
   }
 
   const args = message.content.slice(prefix.length).split(" ");
@@ -72,10 +67,18 @@ client.on("messageCreate", async (message) => {
     const comando = require(`./comandos/${cmd}.js`);
     comando.run(message, args);
   } catch (error) {
-    message.reply("Comando não encontrado.");
+    console.error("Erro ao executar comando:", error);
+    message.reply("❌ Comando não encontrado.");
   }
 });
 
-client.login(process.env.TOKEN)
-  .then(() => console.log("Login feito com sucesso!"))
-  .catch(err => console.error("Erro ao logar:", err));
+// 🚀 LOGIN COM DEBUG
+(async () => {
+  try {
+    console.log("🔑 Tentando logar...");
+    await client.login(process.env.TOKEN);
+    console.log("✅ Login feito com sucesso!");
+  } catch (err) {
+    console.error("❌ ERRO AO LOGAR:", err);
+  }
+})();
