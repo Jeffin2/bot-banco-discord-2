@@ -1,3 +1,5 @@
+console.log("TOKEN TESTE:", process.env.TOKEN);
+
 require("dotenv").config();
 
 const fs = require("fs");
