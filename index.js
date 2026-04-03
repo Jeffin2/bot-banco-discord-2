@@ -76,4 +76,6 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-client.login(process.env.TOKEN);
+client.login(process.env.TOKEN)
+  .then(() => console.log("Login feito com sucesso!"))
+  .catch(err => console.error("Erro ao logar:", err));
