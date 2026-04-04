@@ -1,4 +1,4 @@
-require("dotenv").config(); // 🔥 SEMPRE no topo
+require("dotenv").config(); // 🔥 sempre no topo
 
 const fs = require("fs");
 const express = require("express");
@@ -25,7 +25,7 @@ if (!fs.existsSync("dados.json")) {
 
 const prefix = "!";
 
-// 🌐 Render (mantém online)
+// 🌐 Servidor web (Render)
 const PORT = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
@@ -37,7 +37,16 @@ app.get("/ping", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log("Servidor web rodando!");
+  console.log("🌐 Servidor web rodando!");
+});
+
+// 🔍 DEBUG GLOBAL (pega QUALQUER erro)
+process.on("unhandledRejection", (err) => {
+  console.error("❌ ERRO GLOBAL:", err);
+});
+
+client.on("error", (err) => {
+  console.error("❌ ERRO DO CLIENT:", err);
 });
 
 // 🤖 Bot pronto
@@ -53,7 +62,6 @@ client.on("messageCreate", async (message) => {
 
   const dados = JSON.parse(fs.readFileSync("dados.json"));
 
-  // 🏦 canal permitido
   const canalPermitido = dados.canaisBanco?.[message.guild.id];
 
   if (canalPermitido && message.channel.id !== canalPermitido) {
@@ -67,16 +75,23 @@ client.on("messageCreate", async (message) => {
     const comando = require(`./comandos/${cmd}.js`);
     comando.run(message, args);
   } catch (error) {
-    console.error("Erro ao executar comando:", error);
+    console.error("❌ Erro no comando:", error);
     message.reply("❌ Comando não encontrado.");
   }
 });
 
-// 🚀 LOGIN COM DEBUG
+// 🚀 LOGIN (COM DEBUG TOTAL)
 (async () => {
   try {
-    console.log("🔑 Tentando logar...");
+    console.log("🔑 TOKEN:", process.env.TOKEN ? "OK" : "NÃO ENCONTRADO");
+
+    if (!process.env.TOKEN) {
+      throw new Error("TOKEN não definido no ambiente!");
+    }
+
+    console.log("🔄 Tentando logar...");
     await client.login(process.env.TOKEN);
+
     console.log("✅ Login feito com sucesso!");
   } catch (err) {
     console.error("❌ ERRO AO LOGAR:", err);
